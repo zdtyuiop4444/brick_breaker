@@ -9,11 +9,13 @@ import 'package:flutter/services.dart';
 import 'components/components.dart';
 import 'config.dart';
 
-class BrickBreaker extends Forge2DGame with KeyboardEvents {
+class BrickBreaker extends Forge2DGame with KeyboardEvents, DragCallbacks {
   double get width => size.x;
   double get height => size.y;
   Bat bat = Bat(Vector2(batWidth, batHeight), const Radius.circular(ballRadius),
       Vector2(gameWidth / 2, gameHeight * 3 / 4));
+
+  MouseJoint? mouseJoint;
 
   @override
   FutureOr<void> onLoad() async {
@@ -107,5 +109,37 @@ class BrickBreaker extends Forge2DGame with KeyboardEvents {
       default:
     }
     return KeyEventResult.handled;
+  }
+
+  @override
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
+    final mouseJointDef = MouseJointDef()
+      ..maxForce = 3000 * bat.body.mass * 10
+      ..dampingRatio = 0.1
+      ..frequencyHz = 5
+      ..target.setFrom(bat.body.position)
+      ..collideConnected = false
+      ..bodyA = world.children.query<Wall>().first.body
+      ..bodyB = bat.body;
+
+    if (mouseJoint == null) {
+      mouseJoint = MouseJoint(mouseJointDef);
+      world.createJoint(mouseJoint!);
+    }
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    mouseJoint?.setTarget((event.localEndPosition - Vector2(width / 2, 0)) /
+            camera.viewfinder.zoom +
+        Vector2(gameWidth / 2, 0));
+  }
+
+  @override
+  void onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
+    world.destroyJoint(mouseJoint!);
+    mouseJoint = null;
   }
 }
