@@ -13,6 +13,8 @@ class Bat extends BodyComponent with ContactCallbacks {
   bool isMoveRight = false;
   bool isMoveUp = false;
   bool isMoveDown = false;
+  bool isTurnLeft = false;
+  bool isTurnRight = false;
 
   final _paint = Paint()
     ..color = const Color(0xff1e6091)
@@ -38,7 +40,7 @@ class Bat extends BodyComponent with ContactCallbacks {
       ..userData = this
       ..position = _batPosition
       ..type = BodyType.dynamic
-      ..fixedRotation = true
+      ..fixedRotation = false
       ..gravityOverride = Vector2.zero();
     return world.createBody(bodyDef)..createFixture(fixtureDef);
   }

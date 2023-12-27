@@ -53,6 +53,18 @@ class BrickBreaker extends Forge2DGame with KeyboardEvents, DragCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
+    if (bat.isTurnLeft || bat.isTurnRight) {
+      bat.body.setFixedRotation(false);
+      if (bat.isTurnLeft && bat.body.angularVelocity <= 0) {
+        bat.body.applyAngularImpulse(-batSpeed / 180 * bat.body.inertia);
+      }
+      if (bat.isTurnRight && bat.body.angularVelocity >= 0) {
+        bat.body.applyAngularImpulse(batSpeed / 180 * bat.body.inertia);
+      }
+    } else {
+      bat.body.angularVelocity = 0;
+      bat.body.setFixedRotation(true);
+    }
     if (bat.isMoveLeft || bat.isMoveRight) {
       if (bat.isMoveLeft && bat.body.linearVelocity.x >= -batSpeed) {
         bat.body
@@ -105,6 +117,13 @@ class BrickBreaker extends Forge2DGame with KeyboardEvents, DragCallbacks {
       case LogicalKeyboardKey.arrowDown:
       case LogicalKeyboardKey.keyS:
         world.children.query<Bat>().first.isMoveDown = event is RawKeyDownEvent;
+        break;
+      case LogicalKeyboardKey.keyQ:
+        world.children.query<Bat>().first.isTurnLeft = event is RawKeyDownEvent;
+        break;
+      case LogicalKeyboardKey.keyE:
+        world.children.query<Bat>().first.isTurnRight =
+            event is RawKeyDownEvent;
         break;
       default:
     }
